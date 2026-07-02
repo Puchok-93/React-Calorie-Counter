@@ -5,6 +5,8 @@ import {
     GENDERS,
     DEFAULT_GENDER,
     DEFAULT_ACTIVITY,
+    CALORIE_DEFICIT,
+    CALORIE_PROFICIT
 } from "../../const";
 import { useState } from "react";
 import type { TActivity, TGender, TResult } from "../../types/user";
@@ -42,14 +44,11 @@ function App() {
         const bmr =
             gender === "gender-male"
                 ? 10 * currentWeight + 6.25 * currentHeight - 5 * currentAge + 5
-                : 10 * currentWeight +
-                  6.25 * currentHeight -
-                  5 * currentAge -
-                161;
+                : 10 * currentWeight + 6.25 * currentHeight - 5 * currentAge - 161;
 
         const maintenanceCalories = bmr * activity;
-        const weightLoss = maintenanceCalories - maintenanceCalories * 0.15;
-        const weightGain = maintenanceCalories + maintenanceCalories * 0.15;
+        const weightLoss = maintenanceCalories * CALORIE_DEFICIT;
+        const weightGain = maintenanceCalories * CALORIE_PROFICIT;
 
         return {
             maintenanceCalories: Math.round(maintenanceCalories),
@@ -59,8 +58,7 @@ function App() {
     }
 
     function handleCalcCalories() {
-        const result = calcCalories();
-        setCalories(result);
+        setCalories(calcCalories());
     }
 
     const isFormValid =
@@ -84,6 +82,10 @@ function App() {
                         name="counter"
                         action="#"
                         method="post"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleCalcCalories();
+                        }}
                     >
                         <UserGender
                             genders={GENDERS}
@@ -148,11 +150,14 @@ function App() {
                                             name="height"
                                             value={height}
                                             placeholder={"0"}
-                                            onChange={(e) =>
-                                                setHeight(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                                const value = e.target.value
+                                                    .replace(/\D/g, "")
+                                                    .slice(0, 3);
+                                                setHeight(value);
+                                            }}
                                             maxLength={3}
-                                            inputMode="decimal"
+                                            inputMode="numeric"
                                             required
                                         />
                                     </div>
@@ -176,11 +181,14 @@ function App() {
                                             name="weight"
                                             value={weight}
                                             placeholder={"0"}
-                                            onChange={(e) =>
-                                                setWeight(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                                const value = e.target.value
+                                                    .replace(/\D/g, "")
+                                                    .slice(0, 3);
+                                                setWeight(value);
+                                            }}
                                             maxLength={3}
-                                            inputMode="decimal"
+                                            inputMode="numeric"
                                             required
                                         />
                                     </div>
@@ -198,10 +206,6 @@ function App() {
                                 name="submit"
                                 type="submit"
                                 disabled={!isFormValid}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleCalcCalories();
-                                }}
                             >
                                 Рассчитать
                             </button>
@@ -220,8 +224,8 @@ function App() {
                                     xmlns="http://www.w3.org/2000/svg"
                                 >
                                     <path
-                                        fill-rule="evenodd"
-                                        clip-rule="evenodd"
+                                        fillRule="evenodd"
+                                        clipRule="evenodd"
                                         d="M13.4143 12.0002L18.7072 6.70725C19.0982 6.31625 19.0982 5.68425 18.7072 5.29325C18.3162 4.90225 17.6842 4.90225 17.2933 5.29325L12.0002 10.5862L6.70725 5.29325C6.31625 4.90225 5.68425 4.90225 5.29325 5.29325C4.90225 5.68425 4.90225 6.31625 5.29325 6.70725L10.5862 12.0002L5.29325 17.2933C4.90225 17.6842 4.90225 18.3162 5.29325 18.7072C5.48825 18.9022 5.74425 19.0002 6.00025 19.0002C6.25625 19.0002 6.51225 18.9022 6.70725 18.7072L12.0002 13.4143L17.2933 18.7072C17.4882 18.9022 17.7443 19.0002 18.0002 19.0002C18.2562 19.0002 18.5122 18.9022 18.7072 18.7072C19.0982 18.3162 19.0982 17.6842 18.7072 17.2933L13.4143 12.0002Z"
                                     />
                                 </svg>
@@ -230,7 +234,7 @@ function App() {
                         </div>
                     </form>
                     {calories && (
-                        <section className={`counter__result ${calories ? '' : 'counter__result--hidden'}`}>
+                        <section className="counter__result">
                             <h2 className="heading">Ваша норма калорий</h2>
                             <ul className="counter__result-list">
                                 <li className="counter__result-item">

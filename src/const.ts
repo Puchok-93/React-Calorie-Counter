@@ -48,3 +48,5 @@ export const GENDERS: TGenders = [
 
 export const DEFAULT_GENDER = 'gender-male';
 export const DEFAULT_ACTIVITY = 1.2;
+export const CALORIE_DEFICIT =  0.85;
+export const CALORIE_PROFICIT = 1.15;
