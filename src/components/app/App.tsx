@@ -1,30 +1,37 @@
 import UserActivity from "../user-activity/user-activity";
 import UserGender from "../user-gender/user-gender";
+import Input from "../input/input";
+import CounterResult from "../counter-result/counter-result";
+
 import {
     ACTIVITY,
     GENDERS,
     DEFAULT_GENDER,
-    DEFAULT_ACTIVITY,
-    CALORIE_DEFICIT,
-    CALORIE_PROFICIT
+    DEFAULT_ACTIVITY
 } from "../../const";
 import { useState } from "react";
-import type { TActivity, TGender, TResult } from "../../types/user";
+import type { TActivity, TResult, TGenderID } from "../../types/user";
+import calcCalories from "../../utils/utils";
 
 function App() {
-    const [gender, setGender] = useState<string | null>(DEFAULT_GENDER);
+    const [gender, setGender] = useState<TGenderID>(DEFAULT_GENDER);
     const [activity, setActivity] = useState<number>(DEFAULT_ACTIVITY);
     const [age, setAge] = useState<string>("");
     const [height, setHeight] = useState<string>("");
     const [weight, setWeight] = useState<string>("");
     const [calories, setCalories] = useState<TResult | null>(null);
 
-    function handleSelectGender(gender: TGender) {
-        setGender(gender.id);
+    function handleSelectGender(id: TGenderID) {
+        setGender(id);
     }
 
     function handleSelectActivity(activity: TActivity) {
         setActivity(activity.value);
+    }
+
+    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        handleCalcCalories();
     }
 
     function handleClearForm(): void {
@@ -36,34 +43,18 @@ function App() {
         setCalories(null);
     }
 
-    function calcCalories(): TResult {
-        const currentWeight = Number(weight);
-        const currentHeight = Number(height);
-        const currentAge = Number(age);
-
-        const bmr =
-            gender === "gender-male"
-                ? 10 * currentWeight + 6.25 * currentHeight - 5 * currentAge + 5
-                : 10 * currentWeight + 6.25 * currentHeight - 5 * currentAge - 161;
-
-        const maintenanceCalories = bmr * activity;
-        const weightLoss = maintenanceCalories * CALORIE_DEFICIT;
-        const weightGain = maintenanceCalories * CALORIE_PROFICIT;
-
-        return {
-            maintenanceCalories: Math.round(maintenanceCalories),
-            weightLoss:Math.round(weightLoss),
-            weightGain: Math.round(weightGain),
-        };
-    }
-
     function handleCalcCalories() {
-        setCalories(calcCalories());
+        setCalories(calcCalories({
+            gender,
+            activity,
+            age: Number(age),
+            height: Number(height),
+            weight: Number(weight)
+        }
+        ));
     }
 
     const isFormValid =
-        gender !== null &&
-        activity !== null &&
         height !== "" &&
         weight !== "" &&
         age !== "";
@@ -82,10 +73,7 @@ function App() {
                         name="counter"
                         action="#"
                         method="post"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            handleCalcCalories();
-                        }}
+                        onSubmit={handleSubmit}
                     >
                         <UserGender
                             genders={GENDERS}
@@ -100,99 +88,27 @@ function App() {
                                 Физические параметры
                             </legend>
                             <div className="inputs-group">
-                                <div className="input">
-                                    <div className="input__heading">
-                                        <label
-                                            className="heading"
-                                            htmlFor="age"
-                                        >
-                                            Возраст
-                                        </label>
-                                        <span className="input__heading-unit">
-                                            лет
-                                        </span>
-                                    </div>
-                                    <div className="input__wrapper">
-                                        <input
-                                            type="text"
-                                            id="age"
-                                            name="age"
-                                            value={age}
-                                            placeholder={"0"}
-                                            onChange={(e) => {
-                                                const value = e.target.value
-                                                    .replace(/\D/g, "")
-                                                    .slice(0, 3);
-                                                setAge(value);
-                                            }}
-                                            maxLength={3}
-                                            inputMode="numeric"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <div className="input">
-                                    <div className="input__heading">
-                                        <label
-                                            className="heading"
-                                            htmlFor="height"
-                                        >
-                                            Рост
-                                        </label>
-                                        <span className="input__heading-unit">
-                                            см
-                                        </span>
-                                    </div>
-                                    <div className="input__wrapper">
-                                        <input
-                                            type="text"
-                                            id="height"
-                                            name="height"
-                                            value={height}
-                                            placeholder={"0"}
-                                            onChange={(e) => {
-                                                const value = e.target.value
-                                                    .replace(/\D/g, "")
-                                                    .slice(0, 3);
-                                                setHeight(value);
-                                            }}
-                                            maxLength={3}
-                                            inputMode="numeric"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <div className="input">
-                                    <div className="input__heading">
-                                        <label
-                                            className="heading"
-                                            htmlFor="weight"
-                                        >
-                                            Вес
-                                        </label>
-                                        <span className="input__heading-unit">
-                                            кг
-                                        </span>
-                                    </div>
-                                    <div className="input__wrapper">
-                                        <input
-                                            type="text"
-                                            id="weight"
-                                            name="weight"
-                                            value={weight}
-                                            placeholder={"0"}
-                                            onChange={(e) => {
-                                                const value = e.target.value
-                                                    .replace(/\D/g, "")
-                                                    .slice(0, 3);
-                                                setWeight(value);
-                                            }}
-                                            maxLength={3}
-                                            inputMode="numeric"
-                                            required
-                                        />
-                                    </div>
-                                </div>
+                                <Input
+                                    id='age'
+                                    label="Возраст"
+                                    unit="лет"
+                                    value={age}
+                                    onChange={setAge}
+                                />
+                                <Input
+                                    id='height'
+                                    label="Рост"
+                                    unit="см"
+                                    value={height}
+                                    onChange={setHeight}
+                                />
+                                <Input
+                                    id='weight'
+                                    label="Вес"
+                                    unit="кг"
+                                    value={weight}
+                                    onChange={setWeight}
+                                />
                             </div>
                         </fieldset>
                         <UserActivity
@@ -234,29 +150,7 @@ function App() {
                         </div>
                     </form>
                     {calories && (
-                        <section className="counter__result">
-                            <h2 className="heading">Ваша норма калорий</h2>
-                            <ul className="counter__result-list">
-                                <li className="counter__result-item">
-                                    <h3>
-                                        <span id="calories-norm">{calories.maintenanceCalories}</span>ккал
-                                    </h3>
-                                    <p>поддержание веса</p>
-                                </li>
-                                <li className="counter__result-item">
-                                    <h3>
-                                        <span id="calories-minimal">{calories.weightLoss}</span>ккал
-                                    </h3>
-                                    <p>снижение веса</p>
-                                </li>
-                                <li className="counter__result-item">
-                                    <h3>
-                                        <span id="calories-maximal">{calories.weightGain}</span>ккал
-                                    </h3>
-                                    <p>набор веса</p>
-                                </li>
-                            </ul>
-                        </section>
+                        <CounterResult calories={calories} />
                     )}
                 </article>
             </div>

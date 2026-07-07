@@ -7,7 +7,7 @@ export type TUser = {
 };
 
 export type TGender = {
-    id: string,
+    id: TGenderID,
     value: string,
     label: string,
 }
@@ -27,3 +27,5 @@ export type TResult = {
 
 export type TActivities = TActivity[];
 export type TGenders = TGender[];
+
+export type TGenderID = 'gender-male' | 'gender-female';

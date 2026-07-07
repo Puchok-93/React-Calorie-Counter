@@ -1,9 +1,9 @@
-import type { TGenders, TGender } from "../../types/user";
+import type { TGenders, TGenderID} from "../../types/user";
 
 type TPropsUserGenders = {
     genders: TGenders;
-    gender: string | null;
-    onSelect: (gender: TGender) => void;
+    gender: string;
+    onSelect: (id: TGenderID) => void;
 }
 
 function UserGender({genders, gender, onSelect}: TPropsUserGenders) {
@@ -21,7 +21,7 @@ function UserGender({genders, gender, onSelect}: TPropsUserGenders) {
                                     id={id} 
                                     name="gender" 
                                     value={value} 
-                                    onChange={() => onSelect(item)}
+                                    onChange={() => onSelect(id)}
                                     checked={gender === id}
                                     type="radio" required 
                                 />
